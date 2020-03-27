@@ -7,4 +7,10 @@ D
 a
 b
 c
-A -> AsA
+S -> aA
+S -> b
+S -> bB
+A -> aA
+A -> b
+B -> bB
+B -> a
