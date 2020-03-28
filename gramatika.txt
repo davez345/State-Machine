@@ -1,12 +1,10 @@
-4
+3
+S
 A
 B
-C
-D
-3
+2
 a
 b
-c
 S -> aA
 S -> b
 S -> bB

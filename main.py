@@ -3,6 +3,9 @@ class StateMachine:
         self.startingState = None
         self.finiteState = None
         self.states = {}
+        self.DKAstates = {}
+        self.terminals = []
+        self.nonTerminals = [] 
         
     
     def validate(self, string):
@@ -21,13 +24,70 @@ class StateMachine:
         else:
             self.states[lineArr[0]][lineArr[2][0]].append(lineArr[2][1])
 
+    def saveDKA(self, qDict):
+
+        print(len(self.DKAstates))
+
+        for k, v in self.DKAstates.items():
+            key = qDict[k]
+
+            if(k == self.startingState):
+                print(key + " I")
+            elif("K" in k):
+                print(key + " F")
+            else:
+                print(key)
+
+        print(len(self.terminals))
+        
+        for t in self.terminals:
+            print(t)
+
+        for state, transitions in self.DKAstates.items():
+            for transition, destination in transitions.items():
+                print(qDict[state] + ", " + transition + ", " + qDict[destination])
+
+
+    def createDKA(self):
+        end = False
+        newStates = []
+        newStates.append(self.startingState)
+        i = 0
+
+        while(not end and i != len(newStates)):
+            end = True
+            current = newStates[i]
+            i += 1 
+            self.DKAstates[current] = {} 
+            for c in current:
+                currentNt = c
+                
+                for t in self.terminals:
+                    newState = ""
+                    if(currentNt != "K" and t in self.states[currentNt]):
+                        #print(currentNt + "/" + t)
+                        for state in self.states[currentNt][t]:
+                            newState += state
+                        #print(newState)
+                        self.DKAstates[current].update({ t : newState })
+
+                        if(newState not in newStates):
+                            newStates.append(newState)
+                            #print(newState)
+                            end = False
+                    if(currentNt == "K"):
+                        end = False
+        
+
+
+
 
 lines = []
 ntCount = 0
 tCount = 0
+sm = StateMachine()
 
-nonTerminals = []
-terminals = []
+
 rules = {}
 regular = True
 
@@ -50,16 +110,16 @@ with open('gramatika.txt') as file:
 ntCount = int(lines[0])
 
 for j in range(ntCount):
-    nonTerminals.append(lines[j+1])
+    sm.nonTerminals.append(lines[j+1])
     #print(lines)
 tCount = int(lines[ntCount+1])
 
 for k in range(tCount):
-    terminals.append(lines[ntCount+2+k])
+    sm.terminals.append(lines[ntCount+2+k])
 ruleStart = ntCount + tCount +2
 
-sm = StateMachine()
-sm.startingState = nonTerminals[0]
+#print(sm.nonTerminals)
+sm.startingState = sm.nonTerminals[0]
 
 oldState = ""
 
@@ -92,5 +152,21 @@ else:
 #print(nonTerminals)
 #print(terminals)
 
+#print(sm.states)
+#print("="*40)
+sm.createDKA()
 
-print(sm.states)
+qDict = {}
+i = 0
+
+#print(len(sm.DKAstates))
+
+for key in sm.DKAstates:
+    qDict[key] = "q"+str(i)
+    i += 1
+
+sm.saveDKA(qDict)
+
+#print(sm.DKAstates)
+
+
