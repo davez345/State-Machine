@@ -1,3 +1,9 @@
+import sys,getopt
+
+def printSave(f, string):
+        f.write(str(string)+"\n")
+        print(str(string))
+
 class StateMachine:
     def __init__(self):
         self.startingState = None
@@ -6,10 +12,25 @@ class StateMachine:
         self.DKAstates = {}
         self.terminals = []
         self.nonTerminals = [] 
-        
     
     def validate(self, string):
-        print("sdasdas")
+        current = self.startingState
+        for c in string:
+            if(c not in self.terminals):
+                print("retazec nie je generovany DKA")
+                exit(1)
+            if(c in self.DKAstates[current]):
+                current = self.DKAstates[current][c]
+            else:
+                print("retazec nie je generovany DKA")
+                exit(1)
+        if("K" in current):
+            print("retazec je generovany DKA")
+        else:
+            print("retazec nie je generovany DKA")
+            exit(1)
+
+
 
 
     def addState(self, lineArr):
@@ -24,28 +45,35 @@ class StateMachine:
         else:
             self.states[lineArr[0]][lineArr[2][0]].append(lineArr[2][1])
 
+
+    
+    
+
     def saveDKA(self, qDict):
 
-        print(len(self.DKAstates))
+        saveFile = sys.argv[2]
+        f = open(saveFile, "w")
+        printSave(f,len(self.DKAstates))
+
 
         for k, v in self.DKAstates.items():
             key = qDict[k]
 
             if(k == self.startingState):
-                print(key + " I")
+                printSave(f,key + " I")
             elif("K" in k):
-                print(key + " F")
+                printSave(f,key + " F")
             else:
-                print(key)
+                printSave(f,key)
 
-        print(len(self.terminals))
+        printSave(f,len(self.terminals))
         
         for t in self.terminals:
-            print(t)
+            printSave(f,t)
 
         for state, transitions in self.DKAstates.items():
             for transition, destination in transitions.items():
-                print(qDict[state] + ", " + transition + ", " + qDict[destination])
+                printSave(f,qDict[state] + ", " + transition + ", " + qDict[destination])
 
 
     def createDKA(self):
@@ -78,10 +106,6 @@ class StateMachine:
                     if(currentNt == "K"):
                         end = False
         
-
-
-
-
 lines = []
 ntCount = 0
 tCount = 0
@@ -92,18 +116,21 @@ rules = {}
 regular = True
 
 def checkRight(chars):
-    t = 0
-    for c in chars:
-        if c.islower():
-            t += 1
-    if(t > 1):
-        return False        
-    elif(not chars[len(chars)-1].islower()):
+
+    if(len(chars) > 2):
         return False
+    else:
+        if(chars[0].islower() and chars[1].isupper()):
+            return True
+        else:
+            return False
     return True
+ 
+
+readFile = sys.argv[1]
 
 
-with open('gramatika.txt') as file:
+with open(readFile) as file:
     for line in file:
         lines.append(line.rstrip())
 
@@ -124,16 +151,28 @@ sm.startingState = sm.nonTerminals[0]
 oldState = ""
 
 
-for k in range(ruleStart, len(lines)):
-    lineArr = lines[k].split()
+for k in range(ruleStart, len(lines)-2):
+
+
+    lineArr = lines[k].split("->")
+    lineArrNew = [x.replace(' ','').strip(' ') for x in lineArr]
+    lineArr = []
+    lineArr.append(lineArrNew[0])
+    lineArr.append("->")
+    print(lineArrNew)
+    lineArr.append(lineArrNew[1])
+    
+
     if(oldState != lineArr[0]):
         sm.states[lineArr[0]] = {}
         oldState = lineArr[0]
 
 
-    for c in lineArr[0]:
-        if c.islower():
+    if(len(lineArr[0]) == 1):
+        if lineArr[0].islower():
             regular = False
+    else:
+        regular = False
 
     sm.addState(lineArr)
     
@@ -141,7 +180,10 @@ for k in range(ruleStart, len(lines)):
         regular = checkRight(lineArr[2])
     
     else:
-        sm.states[lineArr[0]].update( { lineArr[2][0] : "K" })
+        
+        if(lineArr[2].isupper()):
+            regular = False
+        
     rules[lineArr[0]] = lineArr[2]
 
 if(not regular):
@@ -162,10 +204,15 @@ i = 0
 #print(len(sm.DKAstates))
 
 for key in sm.DKAstates:
-    qDict[key] = "q"+str(i)
+    qDict[key] = "q" + str(i)
     i += 1
 
 sm.saveDKA(qDict)
+while(1):
+    toValidate = input("Zadaj retazec na overenie: ")
+    sm.validate(toValidate)
+
+
 
 #print(sm.DKAstates)
 

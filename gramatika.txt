@@ -5,10 +5,12 @@ B
 2
 a
 b
-S -> aA
+S -> a A
 S -> b
-S -> bB
-A -> aA
+S -> b B
+A -> a A
 A -> b
-B -> bB
+B -> b B
 B -> a
+
+
