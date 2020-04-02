@@ -194,8 +194,9 @@ else:
 #print(nonTerminals)
 #print(terminals)
 
-#print(sm.states)
-#print("="*40)
+print(sm.states)
+print("="*40)
+
 sm.createDKA()
 
 qDict = {}
